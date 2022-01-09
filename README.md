@@ -1,4 +1,4 @@
-# datasec
+# my-app
 
 ## Project setup
 ```

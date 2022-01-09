@@ -37,7 +37,8 @@
 <script>
 // @ is an alias to /src
 import FetchHelper from '@/helpers/fetchHelper'
-import {setAuthToken, setLoggedInEmail} from '@/services/sessionProps'
+import { setAuthToken, setLoggedInEmail, setPublicKey, setPrivateKey, setSecret } from '@/services/sessionProps'
+import { getDiffieHellman } from '@/helpers/dfh'
 
 export default {
   name: 'Home',
@@ -45,36 +46,43 @@ export default {
   methods: {
     async signInWithGoogle () {
       try {
-        const fetchHelper = new FetchHelper();
-        const googleUser = await this.$gAuth.signIn();
-        let idToken = googleUser.getAuthResponse().id_token;
-        //let PublicKey = ...
+        const fetchHelper = new FetchHelper()
+        const googleUser = await this.$gAuth.signIn()
+        let idToken = googleUser.getAuthResponse().id_token
+        let dfKeys = getDiffieHellman().setUpDFHKeys()
+        let PublicKey = (await dfKeys).publicKeyB64
+        let PrivateKey = (await dfKeys).privateKeyB64
+        setPublicKey(PublicKey)
+        setPrivateKey(PrivateKey)
         const response = await fetch(
-            "https://localhost:5001/api/Auth/google-request",
+            'https://localhost:5001/api/Auth/google-request',
             {
-              method: "POST",
+              method: 'POST',
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
               },
               body: JSON.stringify({
                 idToken,
-                //wtf coś PublicKey
+                PublicKey
               }),
             }
         )
             .then(fetchHelper.handleErrors)
-            .then((res) => res.json());
-        localStorage.setItem("bearer", response.accessToken);
-        setAuthToken(response.access_token);
-        console.log(googleUser);
-        setLoggedInEmail(googleUser.Email);
+            .then((res) => res.json())
+        localStorage.setItem('bearer', response.accessToken)
+        setAuthToken(response.accessToken)
+        //console.log(response.publicKey)
+        setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))
+        //console.log(getDiffieHellman().getSharedSecret(response.publicKey))
+        //console.log(googleUser)
+       // setLoggedInEmail(googleUser.Email)
         await this.$router.push({
-          name: "HomePage",
-        });
-        console.log(googleUser);
+          path: '/main',
+        })
+        //console.log(googleUser)
       } catch (e) {
-        setAuthToken(null);
-        setLoggedInEmail(null);
+        setAuthToken(null)
+        setLoggedInEmail(null)
       }
     }
   }

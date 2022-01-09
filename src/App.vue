@@ -1,7 +1,8 @@
 <template>
-  <div id="app">
-    <router-view/>
+  <div id="nav">
+    <router-view></router-view>
   </div>
+
 </template>
 
 <style>
@@ -13,9 +14,7 @@
   color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
-}
+
 
 #nav a {
   font-weight: bold;

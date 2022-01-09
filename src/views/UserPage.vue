@@ -1,9 +1,9 @@
 <template>
-  <b-container class="content-row" fluid>
+  <b-container class="content-row" fluid="">
     <b-row class="login-info">
       <b-col cols="9"></b-col>
       <b-col class="column-1">
-        <span style="color: white">Zalogowano jako: Janusz Krzysztof </span>
+        <span style="color: white">Zalogowano jako: rosiakd6@gmail.com </span>
         <b-button variant="light">Wyloguj</b-button>
       </b-col>
     </b-row>

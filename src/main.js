@@ -1,10 +1,11 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import GAuth from 'vue3-google-oauth2'
+import BootstrapVue3 from 'bootstrap-vue-3'
 import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-import GAuth from 'vue-google-oauth2'
+import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
+
 
 const gauthOption = {
   clientId: '794246981306-m7rn1ev5b02nc7dl0r8bpurti8arc133.apps.googleusercontent.com',
@@ -12,11 +13,5 @@ const gauthOption = {
   prompt: 'consent',
   fetch_basic_profile: true
 }
-Vue.config.productionTip = false
-Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
-Vue.use(GAuth, gauthOption)
-new Vue({
-  router,
-  render: h => h(App)
-}).$mount('#app')
+
+createApp(App).use(router).use(GAuth, gauthOption).use(BootstrapVue3).mount('#app')
