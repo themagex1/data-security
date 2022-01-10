@@ -1,12 +1,15 @@
 <template>
   <div class="">
-      <div v-for="item in info" :key="item.id">
-          <div v-for="item2 in item.subForms" :key="item2.id">
-              <div v-for="item3 in item2.options" :key="item3.ident">
-                {{ item3.name }}
-              </div>
-          </div>
-      </div>
+    <!--
+
+
+    <div v-for="item in info" :key="item.id">
+
+    </div>
+    -->
+    <div>
+      {{info}}
+    </div>
   </div>
 </template>
 
@@ -19,6 +22,15 @@ export default {
   data () {
     return {
       info: '',
+      check: false,
+      id: 0,
+    }
+  },
+  methods: {
+    showForm (id) {
+      this.check = true
+      this.id = id
+
     }
   },
   mounted () {
@@ -26,6 +38,7 @@ export default {
     axios({ method: 'get', url: 'https://localhost:5001/api/Form', headers: { Authorization: `Bearer ${token}` } })
         .then(response => (this.info = response.data))
     //this.info.filter()
+
 
   }
 }
