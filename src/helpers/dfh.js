@@ -41,7 +41,7 @@ export const DiffieHellman = {
     )
     let sharedSecretHash = await crypto.subtle.digest('SHA-256', sharedSecret)
     let sharedSecretHashB64 = btoa(String.fromCharCode.apply(null, new Uint8Array(sharedSecretHash)))
-    console.log('Bob\'s shared secret: ' + sharedSecretHashB64.replace(/(.{64})/g, '$1\n'))
+    //console.log('Bob\'s shared secret: ' + sharedSecretHashB64.replace(/(.{64})/g, '$1\n'))
     return sharedSecretHashB64.replace(/(.{64})/g, '$1\n')
   },
   _base64ToArrayBuffer (base64) {

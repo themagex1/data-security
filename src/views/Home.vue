@@ -69,13 +69,9 @@ export default {
         )
             .then(fetchHelper.handleErrors)
             .then((res) => res.json())
-        localStorage.setItem('bearer', response.accessToken)
         setAuthToken(response.accessToken)
-        //console.log(response.publicKey)
         setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))
-        //console.log(getDiffieHellman().getSharedSecret(response.publicKey))
-        //console.log(googleUser)
-       // setLoggedInEmail(googleUser.Email)
+
         await this.$router.push({
           path: '/main',
         })
