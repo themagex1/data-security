@@ -52,6 +52,9 @@ export default {
         let dfKeys = getDiffieHellman().setUpDFHKeys()
         let PublicKey = (await dfKeys).publicKeyB64
         let PrivateKey = (await dfKeys).privateKeyB64
+        let crypt = require("crypto");
+        let iv = crypt.randomBytes(22).toString('hex')
+        localStorage.setItem('iv', iv)
         setPublicKey(PublicKey)
         setPrivateKey(PrivateKey)
         const response = await fetch(
@@ -63,7 +66,8 @@ export default {
               },
               body: JSON.stringify({
                 idToken,
-                PublicKey
+                PublicKey,
+                'iv': iv
               }),
             }
         )
@@ -72,6 +76,7 @@ export default {
         setAuthToken(response.accessToken)
         setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))
         localStorage.setItem('user', googleUser.zu.qf)
+
         await this.$router.push({
           path: '/main',
         })

@@ -85,8 +85,9 @@ export default {
 
     async vote () {
       let token = getAuthToken()
+
       console.log(JSON.stringify(this.choices))
-      let aesCipher = this.encryptAES(JSON.stringify(this.choices))
+      let aesCipher = this.encryptAES(JSON.stringify(this.choices), localStorage.getItem('iv'))
       console.log(aesCipher)
       let objJsonB64 = Buffer.from(aesCipher).toString('base64')
       console.log(objJsonB64)
@@ -119,8 +120,9 @@ export default {
 
     },
 
-    encryptAES(message) {
-      const encrypt =  this.$CryptoJS.AES.encrypt(message, getSecret())
+    encryptAES(message, iv) {
+
+      const encrypt =  this.$CryptoJS.AES.encrypt(message, getSecret(), {iv: iv})
       return encrypt.toString()
     },
 
