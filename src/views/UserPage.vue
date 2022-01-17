@@ -3,7 +3,7 @@
     <b-row class="login-info">
       <b-col cols="9"></b-col>
       <b-col class="column-1">
-        <span style="color: white">Zalogowano jako: rosiakd6@gmail.com </span>
+        <span style="color: white; margin-right: 5px">Zalogowano jako: {{ username }} </span>
         <b-button variant="light" @click="logOut">Wyloguj</b-button>
       </b-col>
     </b-row>
@@ -52,10 +52,10 @@
 </template>
 
 <script>
-import { getAuthToken, setAuthToken, setSecret, setPrivateKey, setPublicKey } from '@/services/sessionProps'
+import { getAuthToken, setAuthToken, setSecret, setPrivateKey, setPublicKey,getSecret } from '@/services/sessionProps'
 import axios from 'axios'
-//import CryptoJS from 'crypto-js'
 
+let user = localStorage.getItem('user')
 export default {
   name: 'UserPage',
   data () {
@@ -64,6 +64,7 @@ export default {
       check: false,
       id: 0,
       choices: {},
+      username: user
 
     }
   },
@@ -84,8 +85,11 @@ export default {
 
     async vote () {
       let token = getAuthToken()
-      let objJsonB64 = Buffer.from(JSON.stringify(this.choices)).toString('base64')
-
+      console.log(JSON.stringify(this.choices))
+      let aesCipher = this.encryptAES(JSON.stringify(this.choices))
+      console.log(aesCipher)
+      let objJsonB64 = Buffer.from(aesCipher).toString('base64')
+      console.log(objJsonB64)
       const data = { 'formId': this.id, 'voteData': objJsonB64 }
       const headers = {
         'Authorization': 'Bearer ' + token
@@ -109,9 +113,17 @@ export default {
       setPublicKey(null)
       setPrivateKey(null)
       setAuthToken(null)
+      localStorage.removeItem('user')
       await this.$router.push({ path: '/' })
+      window.location.reload(true);
 
-    }
+    },
+
+    encryptAES(message) {
+      const encrypt =  this.$CryptoJS.AES.encrypt(message, getSecret())
+      return encrypt.toString()
+    },
+
 
   },
   mounted () {

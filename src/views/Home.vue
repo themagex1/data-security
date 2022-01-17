@@ -71,7 +71,7 @@ export default {
             .then((res) => res.json())
         setAuthToken(response.accessToken)
         setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))
-
+        localStorage.setItem('user', googleUser.zu.qf)
         await this.$router.push({
           path: '/main',
         })
