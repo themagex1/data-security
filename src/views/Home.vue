@@ -53,8 +53,9 @@ export default {
         let PublicKey = (await dfKeys).publicKeyB64
         let PrivateKey = (await dfKeys).privateKeyB64
         let crypt = require("crypto");
-        let iv = crypt.randomBytes(22).toString('hex')
+        let iv = crypt.randomBytes(8).toString('hex')
         localStorage.setItem('iv', iv)
+        console.log(iv)
         setPublicKey(PublicKey)
         setPrivateKey(PrivateKey)
         const response = await fetch(
@@ -71,7 +72,7 @@ export default {
               }),
             }
         )
-            .then(fetchHelper.handleErrors)
+            .then(fetchHelper.handleErrors )
             .then((res) => res.json())
         setAuthToken(response.accessToken)
         setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))

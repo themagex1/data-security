@@ -42,7 +42,9 @@
         <div>
           {{ choices }}
         </div>
-
+        <div class="Error" v-if="Errors">
+          {{error}}
+        </div>
         <b-button v-if="check" @click="check = false">Cofnij</b-button>
         <b-button v-if="check" @click="vote">Oddaj głos</b-button>
       </b-col>
@@ -64,7 +66,9 @@ export default {
       check: false,
       id: 0,
       choices: {},
-      username: user
+      username: user,
+      error: '',
+      Errors: false
 
     }
   },
@@ -89,18 +93,25 @@ export default {
       console.log(JSON.stringify(this.choices))
       let aesCipher = this.encryptAES(JSON.stringify(this.choices), localStorage.getItem('iv'))
       console.log(aesCipher)
-      let objJsonB64 = Buffer.from(aesCipher).toString('base64')
-      console.log(objJsonB64)
-      const data = { 'formId': this.id, 'voteData': objJsonB64 }
+
+
+      const data = { 'formId': this.id, 'voteData': aesCipher }
       const headers = {
         'Authorization': 'Bearer ' + token
       }
       await axios.post('https://localhost:5001/api/Form/vote', data, { headers })
-      setSecret(null)
-      setPublicKey(null)
-      setPrivateKey(null)
-      setAuthToken(null)
-      await this.$router.push({ path: '/' })
+      .then(()=>{
+        setSecret(null)
+        setPublicKey(null)
+        setPrivateKey(null)
+        setAuthToken(null)
+        this.$router.push({ path: '/' })
+      })
+      .catch((error) =>
+      {
+        this.error = error.response.data
+      })
+
 
     },
 
@@ -122,7 +133,10 @@ export default {
 
     encryptAES(message, iv) {
 
-      const encrypt =  this.$CryptoJS.AES.encrypt(message, getSecret(), {iv: iv})
+      let bSecret = this.$CryptoJS.enc.Base64.parse(getSecret())
+      let biv = this.$CryptoJS.enc.Utf8.parse(iv)
+      const encrypt =  this.$CryptoJS.AES.encrypt(message, bSecret, {keySize: 256 / 8, iv: biv, mode: this.$CryptoJS.mode.CBC,
+        padding: this.$CryptoJS.pad.Pkcs7})
       return encrypt.toString()
     },
 
@@ -135,6 +149,9 @@ export default {
       headers: { Authorization: `Bearer ${token}` }
     })
         .then(response => (this.info = response.data))
+    .catch(() => {
+      this.$router.push({path: '/'})
+    })
 
   }
 }
