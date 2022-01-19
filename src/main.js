@@ -22,7 +22,6 @@ router.beforeEach((to, from, next) => {
   const loggedIn = getAuthToken()
 
   if (authRequired && !loggedIn) {
-    alert('You must sign in')
     next('/')
   } else if (privates && loggedIn) {
     next('/main')

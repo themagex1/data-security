@@ -33,7 +33,7 @@
                 <div v-for="item3 in item2.options" :key="item3.ident" class="answerName">
                   {{ item3.name }}
                   <input type="checkbox" class="checkboxes" v-model="choices[item2.id]" :id=item3.ident
-                         :value=item3.name>
+                         :value=item3.ident>
                 </div>
               </div>
             </div>
@@ -43,7 +43,7 @@
           {{ choices }}
         </div>
         <div class="Error" v-if="Errors">
-          {{error}}
+          {{ error }}
         </div>
         <b-button v-if="check" @click="check = false">Cofnij</b-button>
         <b-button v-if="check" @click="vote">Oddaj głos</b-button>
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { getAuthToken, setAuthToken, setSecret, setPrivateKey, setPublicKey,getSecret } from '@/services/sessionProps'
+import { getAuthToken, setAuthToken, setSecret, setPrivateKey, setPublicKey, getSecret } from '@/services/sessionProps'
 import axios from 'axios'
 
 let user = localStorage.getItem('user')
@@ -68,8 +68,8 @@ export default {
       choices: {},
       username: user,
       error: '',
-      Errors: false
-
+      Errors: false,
+      message: {}
     }
   },
   methods: {
@@ -87,31 +87,53 @@ export default {
       }
     },
 
-    async vote () {
+    vote () {
+      this.message.FormId = this.id
+      this.message.SubForms = []
+      for (const c in this.choices) {
+        console.log('c ' + c)
+        let tmp = {}
+        tmp.Id = parseInt(c)
+        tmp.Options = []
+        for (let x of this.info) {
+          if (x.id == this.id) {
+            //console.log('x.subForms  ' + JSON.stringify(x.subForms))
+            for (let question of x.subForms) {
+              for (let opt of question.options) {
+                let checked = this.choices[c.toString()].includes(opt.ident)
+                tmp.Options.push({ 'Ident': opt.ident, 'Checked': checked })
+              }
+            }
+          }
+        }
+        this.message.SubForms.push(tmp)
+      }
+      console.log('choices' + JSON.stringify(this.choices))
+      console.log('message' + JSON.stringify(this.message))
       let token = getAuthToken()
 
-      console.log(JSON.stringify(this.choices))
-      let aesCipher = this.encryptAES(JSON.stringify(this.choices), localStorage.getItem('iv'))
+      //console.log(JSON.stringify(t))
+      let aesCipher = this.encryptAES(JSON.stringify(this.message), localStorage.getItem('iv'))
       console.log(aesCipher)
-
 
       const data = { 'formId': this.id, 'voteData': aesCipher }
       const headers = {
         'Authorization': 'Bearer ' + token
       }
-      await axios.post('https://localhost:5001/api/Form/vote', data, { headers })
-      .then(()=>{
-        setSecret(null)
-        setPublicKey(null)
-        setPrivateKey(null)
-        setAuthToken(null)
-        this.$router.push({ path: '/' })
-      })
-      .catch((error) =>
-      {
-        this.error = error.response.data
-      })
+      axios.post('https://localhost:5001/api/Form/vote', data, { headers })
+          .then(() => {
+            setSecret(null)
+            setPublicKey(null)
+            setPrivateKey(null)
+            setAuthToken(null)
+            localStorage.removeItem('user')
+            this.$router.push({ path: '/' })
 
+            //window.location.reload(true)
+          })
+          .catch((error) => {
+            this.error = error.response.data
+          })
 
     },
 
@@ -127,21 +149,23 @@ export default {
       setAuthToken(null)
       localStorage.removeItem('user')
       await this.$router.push({ path: '/' })
-      window.location.reload(true);
+      window.location.reload(true)
 
     },
 
-    encryptAES(message, iv) {
+    encryptAES (message, iv) {
 
       let bSecret = this.$CryptoJS.enc.Base64.parse(getSecret())
       let biv = this.$CryptoJS.enc.Utf8.parse(iv)
-      const encrypt =  this.$CryptoJS.AES.encrypt(message, bSecret, {keySize: 256 / 8, iv: biv, mode: this.$CryptoJS.mode.CBC,
-        padding: this.$CryptoJS.pad.Pkcs7})
+      const encrypt = this.$CryptoJS.AES.encrypt(message, bSecret, {
+        keySize: 256 / 8, iv: biv, mode: this.$CryptoJS.mode.CBC,
+        padding: this.$CryptoJS.pad.Pkcs7
+      })
       return encrypt.toString()
     },
 
-
-  },
+  }
+  ,
   mounted () {
     let token = getAuthToken()
     axios({
@@ -149,9 +173,9 @@ export default {
       headers: { Authorization: `Bearer ${token}` }
     })
         .then(response => (this.info = response.data))
-    .catch(() => {
-      this.$router.push({path: '/'})
-    })
+        .catch(() => {
+
+        })
 
   }
 }

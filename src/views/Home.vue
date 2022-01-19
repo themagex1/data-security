@@ -72,7 +72,7 @@ export default {
               }),
             }
         )
-            .then(fetchHelper.handleErrors )
+            .then(fetchHelper.handleErrors)
             .then((res) => res.json())
         setAuthToken(response.accessToken)
         setSecret(await getDiffieHellman().getSharedSecret(response.publicKey))
@@ -81,7 +81,6 @@ export default {
         await this.$router.push({
           path: '/main',
         })
-        //console.log(googleUser)
       } catch (e) {
         setAuthToken(null)
         setLoggedInEmail(null)
