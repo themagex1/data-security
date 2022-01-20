@@ -30,6 +30,9 @@
             <div v-if="item.id === id">
               <div v-for="item2 in item.subForms" :key="item2.id" class="questionName">
                 {{ item2.name }}
+                <div style="font-size: 20px" >
+                  Limit wyboru: {{item2.choicesLimit}}
+                </div>
                 <div v-for="item3 in item2.options" :key="item3.ident" class="answerName">
                   {{ item3.name }}
                   <input type="checkbox" class="checkboxes" v-model="choices[item2.id]" :id=item3.ident
@@ -45,8 +48,8 @@
         <div class="Error" v-if="Errors">
           {{ error }}
         </div>
-        <b-button v-if="check" @click="check = false">Cofnij</b-button>
-        <b-button v-if="check" @click="vote">Oddaj głos</b-button>
+        <b-button v-if="check" style="margin-bottom: 20px" @click="check = false, Errors = false">Cofnij</b-button>
+        <b-button v-if="check" @click="vote" style="margin-bottom: 20px">Oddaj głos</b-button>
       </b-col>
     </b-row>
 
@@ -69,7 +72,8 @@ export default {
       username: user,
       error: '',
       Errors: false,
-      message: {}
+      message: {},
+      limitChoices: ''
     }
   },
   methods: {
@@ -90,6 +94,7 @@ export default {
     vote () {
       this.message.FormId = this.id
       this.message.SubForms = []
+
       for (const c in this.choices) {
         console.log('c ' + c)
         let tmp = {}
@@ -133,6 +138,7 @@ export default {
           })
           .catch((error) => {
             this.error = error.response.data
+            this.Errors = true
           })
 
     },
@@ -174,7 +180,9 @@ export default {
     })
         .then(response => (this.info = response.data))
         .catch(() => {
-
+            setAuthToken(null)
+            this.$router.push({path: '/'})
+            window.location.reload(true)
         })
 
   }
